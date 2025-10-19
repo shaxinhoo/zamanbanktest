@@ -1,0 +1,4362 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message",
+          "callback_query"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -1680,
+        96
+      ],
+      "id": "ff11d481-2645-4fd9-9af7-7135e39c28dc",
+      "name": "Telegram Trigger",
+      "webhookId": "51475ad0-7003-473c-9684-9fa1506ea6a8",
+      "credentials": {
+        "telegramApi": {
+          "id": "jA50DVowbKhfv8md",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "fileId": "={{ $('Telegram Trigger').item.json.message.voice.file_id }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        288,
+        -208
+      ],
+      "id": "69ad5461-0521-443c-b16d-26b28957ef0d",
+      "name": "Get a file",
+      "webhookId": "a5cb38d4-a936-41ee-9736-18f41bb74b2e",
+      "credentials": {
+        "telegramApi": {
+          "id": "jA50DVowbKhfv8md",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "operation": "transcribe",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        496,
+        -208
+      ],
+      "id": "523b2291-e38b-469e-96f7-e450c98ab41d",
+      "name": "Transcribe a recording",
+      "credentials": {
+        "openAiApi": {
+          "id": "C955Afg4JKo1bTol",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').first().json.message.chat.id }}",
+        "text": "🇰🇿 Сәлем! Мен — Zaman Assistant 🤖\nСенімен танысқаныма қуаныштымын! Қаржыңды ақылмен басқаруға және мақсаттарыңа жетуге көмектесемін 💬\n\n🏡 Пәтер алу, оқу ақысы, сапар немесе жай ғана қаржылық тыныштыққа ұмтылып жүрсің бе?\nМен саған жоспар құруға, үнемдеуге және арманыңа қадам басуға көмектесемін.\n\n💰 Сондай-ақ, Zaman Bank-тен дәл саған лайық депозиттер, несиелер мен инвестицияларды ұсынамын.\n🧘 Ал егер кейде күйзеліс болса — артық шығынсыз жеңіл жолдарын көрсетемін.\n\nСені қалай атайын? 💭\n\n~~~~~~~~~~~~~~~\n\n🇰🇿 Привет! Я — Zaman Assistant 🤖\nРад познакомиться и помочь тебе разобраться с деньгами по-умному 💬\n\n🏡 Хочешь накопить на квартиру, учёбу, путешествие или просто стать спокойнее с финансами?\nЯ помогу спланировать путь, подсказать, где можно сэкономить и как достичь своих целей.\n\n💰 Ещё я подберу подходящие продукты Zaman Bank — депозиты, кредиты или инвестиции.\n🧘 А если иногда стресс — подскажу, как справиться без лишних трат.\n\nКак могу к тебе обращаться? 💭",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        80,
+        -1104
+      ],
+      "id": "a263dfcb-2256-42d5-8560-6cadabab5517",
+      "name": "Send a text message",
+      "webhookId": "8e746ec0-fc55-4a4d-b344-2ba5b0128c02",
+      "credentials": {
+        "telegramApi": {
+          "id": "jA50DVowbKhfv8md",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Telegram Trigger').first().json.message.text || $('Transcribe a recording').first().json.text }}",
+        "options": {
+          "systemMessage": "=Ты Ассистент по вопросам Zaman Bank.\n\nОбщайся просто и по-человечески, как будто разговариваешь с другом, но при этом оставайся умным и надёжным помощником.\nПроверяй есть ли там ответ на вопрос пользователя в Input'е ({{ $json.combinedText }}). В большей степени используй информацию оттуда.\n\nВсегда бери информацию из GetImpulsives, проверяй ее.\n\nТы финансовый ассистент, который помогает пользователю достигать целей, предлагая конкретные решения, а не спрашивая, что он хочет сделать.\nГовори уверенно, кратко и по делу, с заботой, как профессиональный советник.\nВсегда предлагай конкретные шаги, варианты или рекомендации, исходя из текущих данных.\nИзбегай фраз вроде ‘дай знать’, ‘если хочешь’, ‘что думаешь’.\n\nОтвечай на языке пользователя, то есть если он обращается на казахском, то отвечай на казахском языке. По необходимости, переводи источники на казахский. Если на русском то на русском.\n\nГовори коротко, понятно и с лёгким позитивом.\nНе используй канцеляризмов вроде “на основании предоставленной информации” — замени их на естественные фразы вроде “судя по данным” или “похоже, что...”.\n\nЕсли данных нет — скажи честно и предложи помочь другим способом.\n\nЗаписывай все затраты пользователя в SpentToday, где ты должен обновить все столбцы, прибавив к нему spentToday который ввел пользователь.\nЕсли человек уходит за рамки дневного лимита (тратит больше чем нужно) прописанного в дружеской программе, то стрик должен прерваться в дружеской программе. Напиши об этом пользователю, которому прервали стрик через \"SendToUser2\" (Твой друг немного переборщил с тратами — стрик обнулился. Бывает! Попробуйте снова завтра 💪).\nУдаляй дружескую программу между ними через \"DeleteFriend\"\n\nЕсли в GetImpulsives импульсивность равна больше 60, то в дружелюбной форме помоги пользователю советами и рекомандациями. Общайся как друг.\n\nВсегда звучишь живо, естественно и немного тепло, как человек, а не как бот.\n\nНЕ ИСПОЛЬЗУЙ ЖИРНЫЙ И КУРСИВНЫЙ ШРИФТЫ, НЕ ИСПОЛЬЗУЙ СИМВОЛЫ *, #\n\n\"\\n\" значит новая строка, передавай ее по другому, а то телеграм не может отправить сообщение пользователю далее.\n\nНе переводи разговор к специалистам если пользователь сам того не попросит.\n\nПо необходимости предоставляй подходящие под пользователя продукты от Zaman Bank (\"Исламское финансирование\", \"Копилка\", \"Овернайт\", \"Тарифные пакеты\" и так далее).\n\nЕсли ты получил на вход ФИО, то запусти \"UpdateFS\". После заполнения ФИО, говори что пользователю теперь открывается возможность указать свою цель по шаблону: Цель + Итоговая сумма + Сколько лет. Например: Машина, 5 млн тенге, 3 года. \n\nЕсли ты получил на вход Цель (то чего хочет добиться пользователь), то запусти первым делом \"GetUser\", сохрани его нынешний баланс. Запусти далее \"UpdateGoal\", где в startingValue укажи нынешний баланс, а в endValue укажи сумму которую записал пользователь при указании цели, goalEndYear - количество лет за которое пользователь хочет достичь цели."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        1120,
+        -208
+      ],
+      "id": "4a180438-bcbc-428d-8719-f7ec8d0265c1",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "options": {
+          "temperature": 1
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        976,
+        -16
+      ],
+      "id": "2959dbd2-9329-410c-a05d-1773992f16fc",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "C955Afg4JKo1bTol",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').first().json.message.chat.id }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1472,
+        -208
+      ],
+      "id": "fb56ae20-11bc-4e67-a663-68e3b32d4865",
+      "name": "Send a text message1",
+      "webhookId": "d83157fc-f63a-42d4-91ce-ff463bcd98f1",
+      "credentials": {
+        "telegramApi": {
+          "id": "jA50DVowbKhfv8md",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Telegram Trigger').first().json.message.chat.id }}",
+        "contextWindowLength": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        1104,
+        -16
+      ],
+      "id": "de7457d9-b087-4103-acba-ccff31badfc1",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Telegram Trigger').item.json.message.text }}",
+                    "rightValue": "/",
+                    "operator": {
+                      "type": "string",
+                      "operation": "startsWith"
+                    },
+                    "id": "dd9a399d-eb7e-42da-a7db-7cf1b6e7c607"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "b141d00f-1a5c-43ab-9558-c7ed22a88538",
+                    "leftValue": "={{ $('Telegram Trigger').item.json.message.voice }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "object",
+                      "operation": "exists",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "c19e964c-87c2-4bc4-a8a4-279d959fc0d8",
+                    "leftValue": "={{ $('Telegram Trigger').item.json.message.text }}",
+                    "rightValue": "@",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "0e765f36-bb89-42ae-8f91-8412c8d7d1d9",
+                    "leftValue": "={{ $('Telegram Trigger').item.json.message.text }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "exists",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.3,
+      "position": [
+        -528,
+        -48
+      ],
+      "id": "89ce6ff3-2876-4c37-a53d-70a770ce15cf",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Telegram Trigger').item.json.message.text }}",
+                    "rightValue": "/start",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "961e5f10-1fc0-4f82-bb9c-f2db7e1500f6"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "0c9ea70f-8f42-47a1-9de0-2ae2d9198d14",
+                    "leftValue": "={{ $('Telegram Trigger').item.json.message.text }}",
+                    "rightValue": "/profile",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "bc9e7ad4-c540-4ecb-85de-133aa2c9d801",
+                    "leftValue": "={{ $('Telegram Trigger').item.json.message.text }}",
+                    "rightValue": "/balance",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "602ec7a6-83fa-4219-81fc-ecd22e59e9a8",
+                    "leftValue": "={{ $('Telegram Trigger').item.json.message.text }}",
+                    "rightValue": "/balance ",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.3,
+      "position": [
+        -288,
+        -640
+      ],
+      "id": "096d4b3e-79f2-433f-a8e4-1d995759e92b",
+      "name": "Switch2"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "veoeBbwJsnooiMZ9",
+          "mode": "list",
+          "cachedResultName": "users",
+          "cachedResultUrl": "/projects/hue1evCP1XInYnyu/datatables/veoeBbwJsnooiMZ9"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "user_id",
+              "keyValue": "={{ $json.message.chat.id }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        -1296,
+        0
+      ],
+      "id": "9e69988e-6216-4dae-af0a-e7e526461ea0",
+      "name": "Get row(s)",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "692a0353-2f7e-4c2a-85a9-1a462ae93194",
+              "leftValue": "={{ $json.user_id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -1136,
+        0
+      ],
+      "id": "5c84ef85-a093-41db-ac96-851a5cfb9c09",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "dataTableId": {
+          "__rl": true,
+          "value": "veoeBbwJsnooiMZ9",
+          "mode": "list",
+          "cachedResultName": "users",
+          "cachedResultUrl": "/projects/hue1evCP1XInYnyu/datatables/veoeBbwJsnooiMZ9"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "user_id",
+              "keyValue": "={{ $('Telegram Trigger').first().json.message.chat.id }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "firstName": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('firstName', ``, 'string') }}",
+            "surname": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('surname', ``, 'string') }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "user_id",
+              "displayName": "user_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "firstName",
+              "displayName": "firstName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "surname",
+              "displayName": "surname",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "balance",
+              "displayName": "balance",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "goal",
+              "displayName": "goal",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "isImpulsive",
+              "displayName": "isImpulsive",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "readOnly": false,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTableTool",
+      "typeVersion": 1,
+      "position": [
+        2160,
+        -16
+      ],
+      "id": "a0a0d658-641d-4b7f-bcfe-4bd4102dc020",
+      "name": "UpdateFS"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').first().json.message.chat.id }}",
+        "text": "=Ваш баланс: {{ $('Get row(s)').item.json.balance }}\n\nДля смены баланса введите - /balance (сумма баланса)",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        80,
+        -752
+      ],
+      "id": "db38773b-36b8-48f1-962b-efdc1ca6e592",
+      "name": "Send a text message2",
+      "webhookId": "0fcc104a-c3ea-4462-9098-d3edd3580c68",
+      "credentials": {
+        "telegramApi": {
+          "id": "jA50DVowbKhfv8md",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "dataTableId": {
+          "__rl": true,
+          "value": "veoeBbwJsnooiMZ9",
+          "mode": "list",
+          "cachedResultName": "users",
+          "cachedResultUrl": "/projects/hue1evCP1XInYnyu/datatables/veoeBbwJsnooiMZ9"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "user_id",
+              "keyValue": "={{ $('Telegram Trigger').first().json.message.chat.id }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "goal": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('goal', ``, 'string') }}",
+            "startingValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('startingValue', ``, 'string') }}",
+            "endValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('endValue', ``, 'string') }}",
+            "goalEndYear": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('goalEndYear', ``, 'string') }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "user_id",
+              "displayName": "user_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "username",
+              "displayName": "username",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "firstName",
+              "displayName": "firstName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "surname",
+              "displayName": "surname",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "balance",
+              "displayName": "balance",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "goal",
+              "displayName": "goal",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "startingValue",
+              "displayName": "startingValue",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "endValue",
+              "displayName": "endValue",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "goalEndYear",
+              "displayName": "goalEndYear",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTableTool",
+      "typeVersion": 1,
+      "position": [
+        2048,
+        -16
+      ],
+      "id": "52fc7dac-9a6b-44b6-a8d3-f32687c4215d",
+      "name": "UpdateGoal"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').first().json.message.chat.id }}",
+        "text": "=Ваш баланс: {{ $json.balance }}\n\nДля смены баланса введите - /balance (сумма баланса)",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        336,
+        -448
+      ],
+      "id": "85a417fc-bcce-4272-a220-3a01ce2395b1",
+      "name": "Send a text message3",
+      "webhookId": "0fcc104a-c3ea-4462-9098-d3edd3580c68",
+      "credentials": {
+        "telegramApi": {
+          "id": "jA50DVowbKhfv8md",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "dataTableId": {
+          "__rl": true,
+          "value": "veoeBbwJsnooiMZ9",
+          "mode": "list",
+          "cachedResultName": "users",
+          "cachedResultUrl": "/projects/hue1evCP1XInYnyu/datatables/veoeBbwJsnooiMZ9"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "user_id",
+              "keyValue": "={{ $('Telegram Trigger').first().json.message.chat.id }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "balance": "={{ $json.balance }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "user_id",
+              "displayName": "user_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "firstName",
+              "displayName": "firstName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "surname",
+              "displayName": "surname",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "balance",
+              "displayName": "balance",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "goal",
+              "displayName": "goal",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "isImpulsive",
+              "displayName": "isImpulsive",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "readOnly": false,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        112,
+        -448
+      ],
+      "id": "f567f017-2def-4f16-9ea4-8767897e666a",
+      "name": "Update row(s)"
+    },
+    {
+      "parameters": {
+        "jsCode": "// inputData — сообщение пользователя, например \"/balance 25000\"\nconst input = $('Telegram Trigger').first().json.message.text || \"\"; // или $json[\"text\"], зависит от твоего триггера\n\n// Убираем команду и пробелы\nconst balance = input.replace(\"/balance\", \"\").trim();\n\n// Возвращаем как новый объект\nreturn [{ balance }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -80,
+        -448
+      ],
+      "id": "23615a74-df3e-4c91-84ea-4a4cd6ca0511",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "veoeBbwJsnooiMZ9",
+          "mode": "list",
+          "cachedResultName": "users",
+          "cachedResultUrl": "/projects/hue1evCP1XInYnyu/datatables/veoeBbwJsnooiMZ9"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "user_id",
+              "keyValue": "={{ $('Telegram Trigger').first().json.message.chat.id }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.dataTableTool",
+      "typeVersion": 1,
+      "position": [
+        1936,
+        -16
+      ],
+      "id": "50d5ae29-31e1-4125-bbd6-feaf2cc1defc",
+      "name": "GetUser"
+    },
+    {
+      "parameters": {
+        "resource": "point",
+        "operation": "retrievePoints",
+        "collectionName": {
+          "__rl": true,
+          "value": "zaman",
+          "mode": "list",
+          "cachedResultName": "zaman"
+        },
+        "points": "=[\"14e33d20-c227-4914-aeda-a0020fc3be21\", \"19db6f19-f2a9-4848-84aa-959bf993bbf4\", \"1c253e5d-1455-4357-afef-7d779a24ec0b\", \"261dcbc0-9f5a-465b-978c-e8a5962a7b51\", \"3bc04615-a896-4bcb-9b0e-a6d60996a2fd\", \"48776301-bedf-4e01-95f3-6ef94472b249\", \"4f5cbc18-75b7-4451-899c-a444806bbc32\", \"749f5d46-da2b-4627-83e6-90616e548526\", \"aa8e34c4-4831-4172-982c-d2e88dbed676\", \"ad7a584e-8402-4531-a32e-855e89974fc4\", \"b007eace-9638-4413-ac1b-e7de20c2e0a0\", \"ba173b20-a084-45a6-8ba4-9b05976ef3e0\", \"e22941d6-d935-4a69-92a7-c63eb71d6d0d\", \"e63a1d69-1d79-4aa9-a071-83d21386a45d\"]",
+        "requestOptions": {}
+      },
+      "type": "n8n-nodes-qdrant.qdrant",
+      "typeVersion": 1,
+      "position": [
+        720,
+        -208
+      ],
+      "id": "1cc3db8a-9330-4c9a-b3cb-f16eaf138b7b",
+      "name": "Retrieve Points",
+      "credentials": {
+        "qdrantRestApi": {
+          "id": "OjZQYAMgArjYUbL0",
+          "name": "Qdrant account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Берём массив результатов из предыдущего узла\nconst results = $json.result || [];\n\n// Собираем все тексты из payload.text\nconst combinedText = results\n  .map(r => r.payload?.text || \"\")\n  .join(\"\\n\\n---\\n\\n\"); // добавляем разделитель между документами\n\nreturn [{ combinedText }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        928,
+        -208
+      ],
+      "id": "ea51c34d-0c6e-4060-8d08-6b9bb1cff388",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').first().json.message.chat.id }}",
+        "text": "=💳 Профиль {{ $('Get row(s)').item.json.firstName }}:\n\n💰 Текущий баланс: {{ $('Get row(s)').item.json.balance }} ₸\n🎯 Цель: {{ $('Get row(s)').item.json.goal }}\n🏁 Начальный баланс: {{ $('Get row(s)').item.json.startingValue }}₸\n💡 Целевая сумма: {{ $('Get row(s)').item.json.endValue }}₸\n📉 Осталось накопить: {{ $('Get row(s)').item.json.endValue - $('Get row(s)').item.json.startingValue}}₸\n⏰ Время до достижения цели: {{ $('Get row(s)').item.json.goalEndYear }}\n",
+        "replyMarkup": "inlineKeyboard",
+        "inlineKeyboard": {
+          "rows": [
+            {
+              "row": {
+                "buttons": [
+                  {
+                    "text": "Дружеская программа",
+                    "additionalFields": {
+                      "callback_data": "friend"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "row": {
+                "buttons": [
+                  {
+                    "text": "Статистика за неделю",
+                    "additionalFields": {
+                      "callback_data": "stat_week"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "row": {
+                "buttons": [
+                  {
+                    "text": "Статистика за месяц",
+                    "additionalFields": {
+                      "callback_data": "stat_month"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        80,
+        -912
+      ],
+      "id": "7e8e8858-4478-492f-a1da-41dae1d2a339",
+      "name": "Send a text message4",
+      "webhookId": "be645be2-7ee2-4f90-a639-51cbf4420656",
+      "credentials": {
+        "telegramApi": {
+          "id": "jA50DVowbKhfv8md",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "137a5e60-b642-40bb-84fe-0bf8a0d77c74",
+              "leftValue": "={{ $json.callback_query.data }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notExists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -1488,
+        96
+      ],
+      "id": "832e3d48-22ab-42ab-b0aa-d6227bd94b58",
+      "name": "If2"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.callback_query.message.chat.id }}",
+        "text": "=Заинтересовала дружеская программа Zaman Bank? Это не просто накопления, а совместный челендж с друзьями 💪\n\nКак это работает:\nКаждый день у тебя есть лимит расходов, который ты сам выбираешь.\nЕсли не потратишь больше лимита — получаешь 1 очко (день успеха).\nЧем дольше держишь серию — тем больше экономии, уважения и кайфа от самодисциплины 😎\n\nИ вот самое крутое — ты можешь пригласить друга!\nПросто укажи его @username и предложи свой ежедневный лимит.\nЕсли он согласится, вы будете копить стрики вместе, мотивируя друг друга не тратить лишнего.",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        48,
+        720
+      ],
+      "id": "bba6b074-afa8-4337-8fbf-3dc39577974b",
+      "name": "Send a text message5",
+      "webhookId": "0fcc104a-c3ea-4462-9098-d3edd3580c68",
+      "credentials": {
+        "telegramApi": {
+          "id": "jA50DVowbKhfv8md",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.callback_query.data }}",
+                    "rightValue": "friend",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "c1bb8b15-7b0e-48e0-8683-0b2af01e3b83"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "a9fd206e-f3ca-46f0-8756-dd67a64e6517",
+                    "leftValue": "={{ $json.callback_query.data }}",
+                    "rightValue": "stat_week",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "287ec779-3a74-47ed-92b6-3eebe1d1c051",
+                    "leftValue": "={{ $json.callback_query.data }}",
+                    "rightValue": "stat_month",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "83c15c18-602a-433d-b925-1749564dffca",
+                    "leftValue": "={{ $json.callback_query.data }}",
+                    "rightValue": "accept",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "1d9268cc-05b8-4d99-8b4b-f20532077422",
+                    "leftValue": "={{ $json.callback_query.data }}",
+                    "rightValue": "cancel",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "49b8b85c-eda7-42ae-b1d0-6deff82fea0c",
+                    "leftValue": "={{ $json.callback_query.data }}",
+                    "rightValue": "cancel2",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "6ecf81a9-ae60-4e45-a83e-87abfe8e72bb",
+                    "leftValue": "={{ $json.callback_query.data }}",
+                    "rightValue": "profile",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.3,
+      "position": [
+        -1040,
+        688
+      ],
+      "id": "4be0c69c-3137-4c3a-bd2a-9f5e9b4cc690",
+      "name": "Switch1"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Telegram Trigger').item.json.message.text }}",
+        "options": {
+          "systemMessage": "Запиши в pairUsername - @username пользователя, которого(-ую) указали.\n\nЗапиши в dailyLimit - ежедневный лимит, который предложил пользователь.\n\nВ конце отправь, что Приглашение в дружескую программу было отправлено пользователю \"{@pairUsername}\" с ежедневным лимитом \"{dailyLimit}\". Добавь, что вам придет уведомление о принятии или отказе по дружеской программе."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        640,
+        368
+      ],
+      "id": "dff3ea3a-bfbc-45ce-9a6c-995828f147ce",
+      "name": "AI Agent1"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        576,
+        528
+      ],
+      "id": "7f359850-59a7-4be7-b55e-2d0decacf15c",
+      "name": "OpenAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "C955Afg4JKo1bTol",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.user_id || $('Telegram Trigger').item.json.message.chat.id}}",
+        "contextWindowLength": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        704,
+        528
+      ],
+      "id": "652d1159-995b-49b9-a04a-4ed951bbe75e",
+      "name": "Simple Memory1"
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "dataTableId": {
+          "__rl": true,
+          "value": "AVf5GI1GI29cxgFz",
+          "mode": "list",
+          "cachedResultName": "friend_program",
+          "cachedResultUrl": "/projects/hue1evCP1XInYnyu/datatables/AVf5GI1GI29cxgFz"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "user_id",
+              "keyValue": "={{ $('Switch').item.json.user_id }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "pairUsername": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('pairUsername', ``, 'string') }}",
+            "dailyLimit": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('dailyLimit', ``, 'string') }}",
+            "user_id": "={{ $('Switch').item.json.user_id || $('Telegram Trigger').item.json.message.chat.id}}",
+            "isAccepted": false
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "user_id",
+              "displayName": "user_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "pairUsername",
+              "displayName": "pairUsername",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "dailyLimit",
+              "displayName": "dailyLimit",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "currentStreak",
+              "displayName": "currentStreak",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "lastCheckDate",
+              "displayName": "lastCheckDate",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "bestStreak",
+              "displayName": "bestStreak",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "isAccepted",
+              "displayName": "isAccepted",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTableTool",
+      "typeVersion": 1,
+      "position": [
+        864,
+        528
+      ],
+      "id": "4c6bef07-ba7f-4997-9e07-336fe2df5ed7",
+      "name": "AddPair"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1008,
+        368
+      ],
+      "id": "8b75d1b2-2dda-452d-95f4-65243b4e0ca2",
+      "name": "Send a text message6",
+      "webhookId": "4f9f481d-06fc-4e3d-895a-14745d90b430",
+      "credentials": {
+        "telegramApi": {
+          "id": "jA50DVowbKhfv8md",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.user_id }}",
+        "text": "=Привет! 👋\nТебе пришло приглашение от друга присоединиться к дружеской программе Zaman Bank 💚\n\nЭто не просто накопления — это игра на дисциплину и поддержку!\nТвоя задача простая: каждый день не тратить больше установленного лимита.\nЕсли справляешься — получаешь стрик 🔥 (серия успешных дней).\nЧем длиннее серия — тем круче достижения и бонусы!\n\n📩 От кого: @{{ $('Send a text message6').item.json.result.chat.username }}\n\n💰 Ежедневный лимит: {{ $('Code in JavaScript2').item.json.dailyLimit }}₸",
+        "replyMarkup": "inlineKeyboard",
+        "inlineKeyboard": {
+          "rows": [
+            {
+              "row": {
+                "buttons": [
+                  {
+                    "text": "Принять",
+                    "additionalFields": {
+                      "callback_data": "accept"
+                    }
+                  },
+                  {
+                    "text": "Отклонить",
+                    "additionalFields": {
+                      "callback_data": "cancel"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1600,
+        368
+      ],
+      "id": "8db0a8ab-787f-47ec-9ed2-b219d01dc800",
+      "name": "Send a text message7",
+      "webhookId": "4f9f481d-06fc-4e3d-895a-14745d90b430",
+      "credentials": {
+        "telegramApi": {
+          "id": "jA50DVowbKhfv8md",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "veoeBbwJsnooiMZ9",
+          "mode": "list",
+          "cachedResultName": "users",
+          "cachedResultUrl": "/projects/hue1evCP1XInYnyu/datatables/veoeBbwJsnooiMZ9"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "username",
+              "keyValue": "={{ $json.username }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        1392,
+        368
+      ],
+      "id": "4bbe90e5-1534-4ac1-aad3-77fe73ce9aaa",
+      "name": "Get row(s)1"
+    },
+    {
+      "parameters": {
+        "jsCode": "const text = $input.first().json.result.text || \"\";\n\n// Ищем @username\nconst usernameMatch = text.match(/@[A-Za-z0-9_\\.]+/);\nconst username = usernameMatch ? usernameMatch[0] : null;\n\n// Ищем число в кавычках\nconst limitMatch = text.match(/\"(\\d+)\"/);\nconst dailyLimit = limitMatch ? limitMatch[1] : null;\n\nreturn [{\n  username,\n  dailyLimit\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1200,
+        368
+      ],
+      "id": "ced3f087-9904-4a52-9594-4249b504962a",
+      "name": "Code in JavaScript2"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.callback_query.message.chat.id }}",
+        "text": "=Ты принял(-a) приглашение от @{{ $('Get row(s)3').item.json.username }} и теперь вы вместе участвуете в дружеской программе Zaman Bank 💚\n\nКаждый день у тебя есть лимит расходов — {{ $('Get row(s)2').item.json.dailyLimit}} ₸.\nЕсли не тратишь больше этой суммы — получаешь стрик 🔥 (день успеха).\nС каждым новым днём стрик растёт, а вместе с ним — твоя уверенность и дисциплина 💪 \n\nТеперь вы команда 🎯\nСледи за своими стриками, не превышай лимит и копи победы — день за днём.\nZaman Bank всегда рядом, чтобы помочь тебе двигаться к цели с улыбкой 😊",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        112,
+        1600
+      ],
+      "id": "c7251d2e-bd5c-413c-9df6-e2f3ab66bba2",
+      "name": "Send a text message8",
+      "webhookId": "4f9f481d-06fc-4e3d-895a-14745d90b430",
+      "credentials": {
+        "telegramApi": {
+          "id": "jA50DVowbKhfv8md",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "AVf5GI1GI29cxgFz",
+          "mode": "list",
+          "cachedResultName": "friend_program",
+          "cachedResultUrl": "/projects/hue1evCP1XInYnyu/datatables/AVf5GI1GI29cxgFz"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "pairUsername",
+              "keyValue": "=@{{ $json.callback_query.message.chat.username }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        -624,
+        1600
+      ],
+      "id": "946b80c4-35ec-4b52-8b1a-c00f38f0f089",
+      "name": "Get row(s)2"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "veoeBbwJsnooiMZ9",
+          "mode": "list",
+          "cachedResultName": "users",
+          "cachedResultUrl": "/projects/hue1evCP1XInYnyu/datatables/veoeBbwJsnooiMZ9"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "user_id",
+              "keyValue": "={{ $json.user_id }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        -432,
+        1600
+      ],
+      "id": "4aec2cd7-1f9a-427f-921c-a38f0e0757c3",
+      "name": "Get row(s)3"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Get row(s)3').item.json.user_id }}",
+        "text": "=Твое приглашение в дружескую программу Zaman Bank принято! 💚\nТеперь ты и @{{ $json.result.chat.username }} — команда 💪\n\nКаждый из вас будет следить за своими расходами и стараться не тратить больше лимита — {{ $('Get row(s)2').item.json.dailyLimit }} ₸ в день.\nЕсли в течение дня не превышаешь лимит — получаешь стрик 🔥.\nА чем больше стриков подряд, тем сильнее твоя финансовая выдержка и больше поводов гордиться собой 😎",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        288,
+        1600
+      ],
+      "id": "0ad45990-0a0d-4715-b632-736c539b93ee",
+      "name": "Send a text message9",
+      "webhookId": "fe24db42-f064-41a1-9fbf-0353f967dacf",
+      "credentials": {
+        "telegramApi": {
+          "id": "jA50DVowbKhfv8md",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.callback_query.message.chat.id }}",
+        "text": "=Понимаем, не всегда подходящее время для новых целей 💭\nТы отклонил приглашение от {{ $json.username }} к участию в дружеской программе.\n\nНичего страшного — можно вернуться позже, когда почувствуешь, что готов начать копить стрики 💚",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -16,
+        1760
+      ],
+      "id": "54b8bfe3-c05d-4766-850b-ed8156b1cb36",
+      "name": "Send a text message10",
+      "webhookId": "4f9f481d-06fc-4e3d-895a-14745d90b430",
+      "credentials": {
+        "telegramApi": {
+          "id": "jA50DVowbKhfv8md",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "AVf5GI1GI29cxgFz",
+          "mode": "list",
+          "cachedResultName": "friend_program",
+          "cachedResultUrl": "/projects/hue1evCP1XInYnyu/datatables/AVf5GI1GI29cxgFz"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "pairUsername",
+              "keyValue": "=@{{ $json.callback_query.message.chat.username }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        -624,
+        1760
+      ],
+      "id": "bc9e3f69-c6e8-4e57-8c06-0c69e18d1941",
+      "name": "Get row(s)4"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "veoeBbwJsnooiMZ9",
+          "mode": "list",
+          "cachedResultName": "users",
+          "cachedResultUrl": "/projects/hue1evCP1XInYnyu/datatables/veoeBbwJsnooiMZ9"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "user_id",
+              "keyValue": "={{ $json.user_id }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        -432,
+        1760
+      ],
+      "id": "70564e4c-c091-4b2b-a1b3-12b13b6948ec",
+      "name": "Get row(s)5",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Get row(s)5').item.json.user_id }}",
+        "text": "=Похоже, {{ $('Get row(s)4').item.json.pairUsername }} пока не готов(а) присоединиться к дружеской программе.\nНе расстраивайся 💚 — иногда просто не подходящее время, и это нормально.\n\nНо ты не один!\nZaman Bank всегда рядом, чтобы помочь тебе двигаться к цели — даже если пока без команды.\nМы поможем следить за расходами, подскажем, как удерживать баланс и не терять мотивацию 💪",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        192,
+        1760
+      ],
+      "id": "9c98537f-5d85-4354-be4d-4241b621a49f",
+      "name": "Send a text message11",
+      "webhookId": "fe24db42-f064-41a1-9fbf-0353f967dacf",
+      "credentials": {
+        "telegramApi": {
+          "id": "jA50DVowbKhfv8md",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "dataTableId": {
+          "__rl": true,
+          "value": "AVf5GI1GI29cxgFz",
+          "mode": "list",
+          "cachedResultName": "friend_program",
+          "cachedResultUrl": "/projects/hue1evCP1XInYnyu/datatables/AVf5GI1GI29cxgFz"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "user_id",
+              "keyValue": "={{ $('Get row(s)3').item.json.user_id }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "isAccepted": true,
+            "currentStreak": 0,
+            "lastCheckDate": "={{ $json.last_check_date }}",
+            "bestStreak": "0"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "user_id",
+              "displayName": "user_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "pairUsername",
+              "displayName": "pairUsername",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "dailyLimit",
+              "displayName": "dailyLimit",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "currentStreak",
+              "displayName": "currentStreak",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "lastCheckDate",
+              "displayName": "lastCheckDate",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "bestStreak",
+              "displayName": "bestStreak",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "isAccepted",
+              "displayName": "isAccepted",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        -64,
+        1600
+      ],
+      "id": "64d8591a-135b-4899-9ff6-fef0734a1f52",
+      "name": "Update row(s)1"
+    },
+    {
+      "parameters": {
+        "jsCode": "return [{\n  last_check_date: new Date().toISOString()\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -224,
+        1600
+      ],
+      "id": "e8f8a07c-e042-480f-94db-5467ead61dc9",
+      "name": "Code in JavaScript3"
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "dataTableId": {
+          "__rl": true,
+          "value": "veoeBbwJsnooiMZ9",
+          "mode": "list",
+          "cachedResultName": "users",
+          "cachedResultUrl": "/projects/hue1evCP1XInYnyu/datatables/veoeBbwJsnooiMZ9"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "user_id",
+              "keyValue": "={{ $('Telegram Trigger').item.json.message.chat.id }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "user_id": "={{ $('Telegram Trigger').first().json.message.chat.id }}",
+            "balance": 0,
+            "username": "=@{{ $('Telegram Trigger').item.json.message.from.username }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "user_id",
+              "displayName": "user_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "username",
+              "displayName": "username",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "firstName",
+              "displayName": "firstName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "surname",
+              "displayName": "surname",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "balance",
+              "displayName": "balance",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "goal",
+              "displayName": "goal",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "isImpulsive",
+              "displayName": "isImpulsive",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "startingValue",
+              "displayName": "startingValue",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "endValue",
+              "displayName": "endValue",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "goalEndYear",
+              "displayName": "goalEndYear",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        -480,
+        224
+      ],
+      "id": "3d6d0281-a6f3-4a75-8f9e-7f3952b76599",
+      "name": "Upsert row(s)"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "AVf5GI1GI29cxgFz",
+          "mode": "list",
+          "cachedResultName": "friend_program",
+          "cachedResultUrl": "/projects/hue1evCP1XInYnyu/datatables/AVf5GI1GI29cxgFz"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "user_id",
+              "keyValue": "={{ $json.callback_query.message.chat.id }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        -736,
+        496
+      ],
+      "id": "e054943b-17ee-42aa-b80a-dea9e3ef5dd2",
+      "name": "Get row(s)6",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "e1997100-f0ba-45c1-97ab-d38d8c359272",
+              "leftValue": "={{ $json.isAccepted }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -512,
+        496
+      ],
+      "id": "1ef7d1da-dd8d-417d-b469-8afcf3665a8a",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').first().json.callback_query?.message?.chat?.id || $('Telegram Trigger').first().json.message?.chat?.id }}",
+        "text": "=Привет, @{{ $('Telegram Trigger').first().json.callback_query?.message?.chat?.username || $('Telegram Trigger').first().json.message?.chat?.username }} 👋\nПохоже, ты уже участвуешь в одной дружеской программе — и это круто 💚\nКаждый участник может быть только в одной паре, чтобы сохранять баланс и фокус.\n\nСейчас ты копишь стрики вместе с {{ $('Get row(s)7').item.json.pairUsername || $('Get row(s)8').item.json.pairUsername}},\nпоэтому не можешь принять новое приглашение, пока эта программа активна.",
+        "replyMarkup": "inlineKeyboard",
+        "inlineKeyboard": {
+          "rows": [
+            {
+              "row": {
+                "buttons": [
+                  {
+                    "text": "Отменить дружескую программу",
+                    "additionalFields": {
+                      "callback_data": "cancel2"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        48,
+        480
+      ],
+      "id": "134d9593-734b-47f4-a08b-da0c6b7be7be",
+      "name": "Send a text message12",
+      "webhookId": "0fcc104a-c3ea-4462-9098-d3edd3580c68",
+      "credentials": {
+        "telegramApi": {
+          "id": "jA50DVowbKhfv8md",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "AVf5GI1GI29cxgFz",
+          "mode": "list",
+          "cachedResultName": "friend_program",
+          "cachedResultUrl": "/projects/hue1evCP1XInYnyu/datatables/AVf5GI1GI29cxgFz"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "user_id",
+              "keyValue": "={{ $json.user_id }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        -16,
+        208
+      ],
+      "id": "8174b190-be51-447c-ab34-314ed0ce109f",
+      "name": "Get row(s)7",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "e1997100-f0ba-45c1-97ab-d38d8c359272",
+              "leftValue": "={{ $json.isAccepted }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        208,
+        208
+      ],
+      "id": "86394f27-ece8-47b6-bd72-f8536f193f79",
+      "name": "If3"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "AVf5GI1GI29cxgFz",
+          "mode": "list",
+          "cachedResultName": "friend_program",
+          "cachedResultUrl": "/projects/hue1evCP1XInYnyu/datatables/AVf5GI1GI29cxgFz"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "user_id",
+              "keyValue": "={{ $json.user_id }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        -224,
+        480
+      ],
+      "id": "777c4c9e-b6c1-4d77-bbc9-fe923f70b246",
+      "name": "Get row(s)8",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "operation": "deleteRows",
+        "dataTableId": {
+          "__rl": true,
+          "value": "AVf5GI1GI29cxgFz",
+          "mode": "list",
+          "cachedResultName": "friend_program",
+          "cachedResultUrl": "/projects/hue1evCP1XInYnyu/datatables/AVf5GI1GI29cxgFz"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "user_id",
+              "keyValue": "={{ $('Telegram Trigger').item.json.message.chat.id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        -224,
+        1760
+      ],
+      "id": "b61f0e8d-220a-4fae-a197-1ce270408b0c",
+      "name": "Delete row(s)",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "AVf5GI1GI29cxgFz",
+          "mode": "list",
+          "cachedResultName": "friend_program",
+          "cachedResultUrl": "/projects/hue1evCP1XInYnyu/datatables/AVf5GI1GI29cxgFz"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "user_id",
+              "keyValue": "={{ $json.callback_query.message.chat.id }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        -624,
+        1952
+      ],
+      "id": "e364deeb-03b0-4c6a-9e3d-5f5ebb09d76c",
+      "name": "Get row(s)9"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "veoeBbwJsnooiMZ9",
+          "mode": "list",
+          "cachedResultName": "users",
+          "cachedResultUrl": "/projects/hue1evCP1XInYnyu/datatables/veoeBbwJsnooiMZ9"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "username",
+              "keyValue": "={{ $json.pairUsername }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        -432,
+        1952
+      ],
+      "id": "4ef96f42-63c0-4078-8684-3bc9ff66ed59",
+      "name": "Get row(s)10"
+    },
+    {
+      "parameters": {
+        "operation": "deleteRows",
+        "dataTableId": {
+          "__rl": true,
+          "value": "AVf5GI1GI29cxgFz",
+          "mode": "list",
+          "cachedResultName": "friend_program",
+          "cachedResultUrl": "/projects/hue1evCP1XInYnyu/datatables/AVf5GI1GI29cxgFz"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "user_id",
+              "keyValue": "={{ $('Telegram Trigger').item.json.callback_query.message.chat.id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        -144,
+        1952
+      ],
+      "id": "e6097117-3486-47f9-ae04-862c3a04705d",
+      "name": "Delete row(s)1",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.callback_query.message.chat.id }}",
+        "text": "=Программа с {{ $('Get row(s)9').item.json.pairUsername }} была отменена.\nИногда цели и обстоятельства меняются — и это нормально 💚\n\nТвоя серия (стрик) остановлена, но опыт и дисциплина, которые ты получил, — остаются с тобой.\nГлавное, что ты попробовал и сделал шаг к финансовой осознанности 🙌",
+        "replyMarkup": "inlineKeyboard",
+        "inlineKeyboard": {
+          "rows": [
+            {
+              "row": {
+                "buttons": [
+                  {
+                    "text": "Дружеская программа",
+                    "additionalFields": {
+                      "callback_data": "friend"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        64,
+        1952
+      ],
+      "id": "db49d0cb-b228-44dd-8649-57102648527c",
+      "name": "Send a text message13",
+      "webhookId": "4f9f481d-06fc-4e3d-895a-14745d90b430",
+      "credentials": {
+        "telegramApi": {
+          "id": "jA50DVowbKhfv8md",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Get row(s)10').item.json.user_id }}",
+        "text": "=Похоже, @{{ $('Telegram Trigger').item.json.callback_query.message.chat.username }} решил(а) завершить вашу дружескую программу.\nНичего страшного — такое бывает 💭\n\nВаши стрики остановлены, но все достижения остаются твоими 💚\nТы показал(а) отличную дисциплину и стремление держать расходы под контролем — и это уже победа!",
+        "replyMarkup": "inlineKeyboard",
+        "inlineKeyboard": {
+          "rows": [
+            {
+              "row": {
+                "buttons": [
+                  {
+                    "text": "Дружеская программа",
+                    "additionalFields": {
+                      "callback_data": "friend"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        272,
+        1952
+      ],
+      "id": "f0b4d9f7-5e64-4062-8550-e3ee3e612183",
+      "name": "Send a text message14",
+      "webhookId": "fe24db42-f064-41a1-9fbf-0353f967dacf",
+      "credentials": {
+        "telegramApi": {
+          "id": "jA50DVowbKhfv8md",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "1qy1Ljmu5WKXXhXJu2GgdwJvWTVwG3OiD",
+          "mode": "list",
+          "cachedResultName": "3.csv",
+          "cachedResultUrl": "https://drive.google.com/file/d/1qy1Ljmu5WKXXhXJu2GgdwJvWTVwG3OiD/view?usp=drivesdk"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -512,
+        1184
+      ],
+      "id": "e60907b1-2a59-4707-9e1a-05551b7f6dcb",
+      "name": "Download file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "CmnhH1LphU3YAbDH",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// n8n Function Node\n// Input: items from \"Spreadsheet File\" node (CSV with Russian headers)\n\nconst today = new Date();\nconst todayStr = today.toISOString().split('T')[0];\n\n// Define ranges\nconst weekAgo = new Date(today);\nweekAgo.setDate(today.getDate() - 7);\n\nconst monthAgo = new Date(today);\nmonthAgo.setDate(today.getDate() - 30);\n\n// Initialize counters\nlet spentToday = 0;\nlet spentWeek = 0;\nlet spentMonth = 0;\nlet spentTotal = 0;\n\nlet impulsiveWeek = 0;\nlet impulsiveMonth = 0;\nlet impulsiveTotal = 0;\n\nlet totalWeek = 0;\nlet totalMonth = 0;\nlet totalTotal = 0;\n\n// Impulsive categories (in Russian)\nconst impulsiveCategories = [\n  'Продукты',\n  'Повседневная_Необходимость',\n  'Личные_Услуги',\n  'Подписка'\n];\n\n// Threshold for cheap impulsive purchases\nconst impulsivePriceThreshold = 5000;\n\nfor (const item of items) {\n  const amount = parseFloat(item.json['Цена_Оплаченная_KZT'] || 0);\n  const ts = item.json['Дата_Время_Покупки'];\n  const category = item.json['Категория_Продукта'] || '';\n\n  if (!amount || !ts) continue;\n\n  const purchaseDate = new Date(ts);\n  const purchaseDateStr = ts.split(' ')[0];\n\n  // Total spent\n  spentTotal += amount;\n  totalTotal++;\n\n  // Today\n  if (purchaseDateStr === todayStr) {\n    spentToday += amount;\n  }\n\n  // Week\n  if (purchaseDate >= weekAgo && purchaseDate <= today) {\n    spentWeek += amount;\n    totalWeek++;\n  }\n\n  // Month\n  if (purchaseDate >= monthAgo && purchaseDate <= today) {\n    spentMonth += amount;\n    totalMonth++;\n  }\n\n  // Impulsive check\n  const isImpulsive =\n    impulsiveCategories.includes(category) || amount < impulsivePriceThreshold;\n\n  if (isImpulsive) {\n    impulsiveTotal++;\n    if (purchaseDate >= weekAgo && purchaseDate <= today) impulsiveWeek++;\n    if (purchaseDate >= monthAgo && purchaseDate <= today) impulsiveMonth++;\n  }\n}\n\n// Calculate percentages\nconst impulsiveWeekPercentage =\n  totalWeek > 0 ? (impulsiveWeek / totalWeek) * 100 : 0;\nconst impulsiveMonthPercentage =\n  totalMonth > 0 ? (impulsiveMonth / totalMonth) * 100 : 0;\nconst impulsiveTotalPercentage =\n  totalTotal > 0 ? (impulsiveTotal / totalTotal) * 100 : 0;\n\n// Output result\nreturn [\n  {\n    json: {\n      spent_today: spentToday.toFixed(2),\n      spent_week: spentWeek.toFixed(2),\n      spent_month: spentMonth.toFixed(2),\n      spent_total: spentTotal.toFixed(2),\n\n      impulsive_week: impulsiveWeek,\n      impulsive_month: impulsiveMonth,\n      impulsive_total: impulsiveTotal,\n\n      impulsive_week_percentage: impulsiveWeekPercentage.toFixed(2),\n      impulsive_month_percentage: impulsiveMonthPercentage.toFixed(2),\n      impulsive_total_percentage: impulsiveTotalPercentage.toFixed(2)\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -80,
+        1184
+      ],
+      "id": "92794dd2-bbdc-4b55-8177-ba3e758e1924",
+      "name": "Code in JavaScript4"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        -288,
+        1184
+      ],
+      "id": "3f39e2fc-a0ac-40a4-aca7-f3b6ed61f1e2",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "dataTableId": {
+          "__rl": true,
+          "value": "3v7LZwLYSWTPnqR9",
+          "mode": "list",
+          "cachedResultName": "users_spendings",
+          "cachedResultUrl": "/projects/hue1evCP1XInYnyu/datatables/3v7LZwLYSWTPnqR9"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "user_id",
+              "keyValue": "={{ $('Telegram Trigger').first().json.callback_query.message.chat.id }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "user_id": "={{ $('Telegram Trigger').first().json.callback_query.message.chat.id }}",
+            "spentToday": "={{ $json.spent_today }}",
+            "spentTotal": "={{ $json.spent_total }}",
+            "spentWeek": "={{ $json.spent_week }}",
+            "spentMonth": "={{ $json.spent_month }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "user_id",
+              "displayName": "user_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "spentToday",
+              "displayName": "spentToday",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "spentTotal",
+              "displayName": "spentTotal",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "spentWeek",
+              "displayName": "spentWeek",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "spentMonth",
+              "displayName": "spentMonth",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        128,
+        1184
+      ],
+      "id": "9d5b0ee5-0c30-47af-b840-d1be0f7198c0",
+      "name": "Upsert row(s)1"
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "dataTableId": {
+          "__rl": true,
+          "value": "quoRFZvu9zGteYzH",
+          "mode": "list",
+          "cachedResultName": "user_impulsives",
+          "cachedResultUrl": "/projects/hue1evCP1XInYnyu/datatables/quoRFZvu9zGteYzH"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "user_id",
+              "keyValue": "={{ $('Telegram Trigger').first().json.callback_query.message.chat.id }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "user_id": "={{ $('Telegram Trigger').first().json.callback_query.message.chat.id }}",
+            "impulsive_total": "={{ $('Code in JavaScript4').item.json.impulsive_total }}",
+            "impulsive_month": "={{ $('Code in JavaScript4').item.json.impulsive_month }}",
+            "impulsive_week": "={{ $('Code in JavaScript4').item.json.impulsive_week }}",
+            "impulsiveWeekPercentage": "={{ $('Code in JavaScript4').item.json.impulsive_week_percentage }}",
+            "impulsiveMonthPercentage": "={{ $('Code in JavaScript4').item.json.impulsive_month_percentage }}",
+            "impulsiveTotalPercentage": "={{ $('Code in JavaScript4').item.json.impulsive_total_percentage }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "user_id",
+              "displayName": "user_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "impulsive_week",
+              "displayName": "impulsive_week",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "impulsive_month",
+              "displayName": "impulsive_month",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "impulsive_total",
+              "displayName": "impulsive_total",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "impulsiveWeekPercentage",
+              "displayName": "impulsiveWeekPercentage",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "impulsiveMonthPercentage",
+              "displayName": "impulsiveMonthPercentage",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "impulsiveTotalPercentage",
+              "displayName": "impulsiveTotalPercentage",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        336,
+        1184
+      ],
+      "id": "59424e9a-be9b-4596-ae5b-3ad4f3e48807",
+      "name": "Upsert row(s)2"
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "1l-3okoLIeLDM0WCSzIXxdqqWYdMiIBwf",
+          "mode": "list",
+          "cachedResultName": "1.csv",
+          "cachedResultUrl": "https://drive.google.com/file/d/1l-3okoLIeLDM0WCSzIXxdqqWYdMiIBwf/view?usp=drivesdk"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -512,
+        976
+      ],
+      "id": "98b7925b-92f2-4f51-874d-452d839886d8",
+      "name": "Download file1",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "CmnhH1LphU3YAbDH",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// n8n Function Node\n// Input: items from \"Spreadsheet File\" node (CSV with Russian headers)\n\nconst today = new Date();\nconst todayStr = today.toISOString().split('T')[0];\n\n// Define ranges\nconst weekAgo = new Date(today);\nweekAgo.setDate(today.getDate() - 7);\n\nconst monthAgo = new Date(today);\nmonthAgo.setDate(today.getDate() - 30);\n\n// Initialize counters\nlet spentToday = 0;\nlet spentWeek = 0;\nlet spentMonth = 0;\nlet spentTotal = 0;\n\nlet impulsiveWeek = 0;\nlet impulsiveMonth = 0;\nlet impulsiveTotal = 0;\n\nlet totalWeek = 0;\nlet totalMonth = 0;\nlet totalTotal = 0;\n\n// Impulsive categories (in Russian)\nconst impulsiveCategories = [\n  'Продукты',\n  'Повседневная_Необходимость',\n  'Личные_Услуги',\n  'Подписка'\n];\n\n// Threshold for cheap impulsive purchases\nconst impulsivePriceThreshold = 5000;\n\nfor (const item of items) {\n  const amount = parseFloat(item.json['Цена_Оплаченная_KZT'] || 0);\n  const ts = item.json['Дата_Время_Покупки'];\n  const category = item.json['Категория_Продукта'] || '';\n\n  if (!amount || !ts) continue;\n\n  const purchaseDate = new Date(ts);\n  const purchaseDateStr = ts.split(' ')[0];\n\n  // Total spent\n  spentTotal += amount;\n  totalTotal++;\n\n  // Today\n  if (purchaseDateStr === todayStr) {\n    spentToday += amount;\n  }\n\n  // Week\n  if (purchaseDate >= weekAgo && purchaseDate <= today) {\n    spentWeek += amount;\n    totalWeek++;\n  }\n\n  // Month\n  if (purchaseDate >= monthAgo && purchaseDate <= today) {\n    spentMonth += amount;\n    totalMonth++;\n  }\n\n  // Impulsive check\n  const isImpulsive =\n    impulsiveCategories.includes(category) || amount < impulsivePriceThreshold;\n\n  if (isImpulsive) {\n    impulsiveTotal++;\n    if (purchaseDate >= weekAgo && purchaseDate <= today) impulsiveWeek++;\n    if (purchaseDate >= monthAgo && purchaseDate <= today) impulsiveMonth++;\n  }\n}\n\n// Calculate percentages\nconst impulsiveWeekPercentage =\n  totalWeek > 0 ? (impulsiveWeek / totalWeek) * 100 : 0;\nconst impulsiveMonthPercentage =\n  totalMonth > 0 ? (impulsiveMonth / totalMonth) * 100 : 0;\nconst impulsiveTotalPercentage =\n  totalTotal > 0 ? (impulsiveTotal / totalTotal) * 100 : 0;\n\n// Output result\nreturn [\n  {\n    json: {\n      spent_today: spentToday.toFixed(2),\n      spent_week: spentWeek.toFixed(2),\n      spent_month: spentMonth.toFixed(2),\n      spent_total: spentTotal.toFixed(2),\n\n      impulsive_week: impulsiveWeek,\n      impulsive_month: impulsiveMonth,\n      impulsive_total: impulsiveTotal,\n\n      impulsive_week_percentage: impulsiveWeekPercentage.toFixed(2),\n      impulsive_month_percentage: impulsiveMonthPercentage.toFixed(2),\n      impulsive_total_percentage: impulsiveTotalPercentage.toFixed(2)\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -80,
+        976
+      ],
+      "id": "2609d91c-0323-456f-a075-6aa65787de5f",
+      "name": "Code in JavaScript5"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        -288,
+        976
+      ],
+      "id": "5e79eddb-58a3-4e7a-b57c-9873fb8ad329",
+      "name": "Extract from File1"
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "dataTableId": {
+          "__rl": true,
+          "value": "3v7LZwLYSWTPnqR9",
+          "mode": "list",
+          "cachedResultName": "users_spendings",
+          "cachedResultUrl": "/projects/hue1evCP1XInYnyu/datatables/3v7LZwLYSWTPnqR9"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "user_id",
+              "keyValue": "={{ $('Telegram Trigger').first().json.callback_query.message.chat.id }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "user_id": "={{ $('Telegram Trigger').first().json.callback_query.message.chat.id }}",
+            "spentToday": "={{ $json.spent_today }}",
+            "spentTotal": "={{ $json.spent_total }}",
+            "spentWeek": "={{ $json.spent_week }}",
+            "spentMonth": "={{ $json.spent_month }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "user_id",
+              "displayName": "user_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "spentToday",
+              "displayName": "spentToday",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "spentTotal",
+              "displayName": "spentTotal",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "spentWeek",
+              "displayName": "spentWeek",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "spentMonth",
+              "displayName": "spentMonth",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        128,
+        976
+      ],
+      "id": "10238c22-eb0b-4b6c-b0d0-40c6188581d7",
+      "name": "Upsert row(s)3"
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "dataTableId": {
+          "__rl": true,
+          "value": "quoRFZvu9zGteYzH",
+          "mode": "list",
+          "cachedResultName": "user_impulsives",
+          "cachedResultUrl": "/projects/hue1evCP1XInYnyu/datatables/quoRFZvu9zGteYzH"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "user_id",
+              "keyValue": "={{ $('Telegram Trigger').first().json.callback_query.message.chat.id }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "user_id": "={{ $('Telegram Trigger').first().json.callback_query.message.chat.id }}",
+            "impulsive_total": "={{ $('Code in JavaScript5').item.json.impulsive_total }}",
+            "impulsive_month": "={{ $('Code in JavaScript5').item.json.impulsive_month }}",
+            "impulsive_week": "={{ $('Code in JavaScript5').item.json.impulsive_week }}",
+            "impulsiveWeekPercentage": "={{ $('Code in JavaScript5').item.json.impulsive_week_percentage }}",
+            "impulsiveMonthPercentage": "={{ $('Code in JavaScript5').item.json.impulsive_month_percentage }}",
+            "impulsiveTotalPercentage": "={{ $('Code in JavaScript5').item.json.impulsive_total_percentage }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "user_id",
+              "displayName": "user_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "impulsive_week",
+              "displayName": "impulsive_week",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "impulsive_month",
+              "displayName": "impulsive_month",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "impulsive_total",
+              "displayName": "impulsive_total",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "impulsiveWeekPercentage",
+              "displayName": "impulsiveWeekPercentage",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "impulsiveMonthPercentage",
+              "displayName": "impulsiveMonthPercentage",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "impulsiveTotalPercentage",
+              "displayName": "impulsiveTotalPercentage",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        336,
+        976
+      ],
+      "id": "b95d28ab-7066-4b94-9c3e-636cc1157986",
+      "name": "Upsert row(s)4"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').first().json.callback_query.message.chat.id }}",
+        "text": "=Статистика @{{ $('Telegram Trigger').first().json.callback_query.message.chat.username }} в течении месяца:\n\n💰 Траты\n\nЗа месяц: {{ $('Upsert row(s)1').item.json.spentMonth }} ₸\nЗа всё время: {{ $('Upsert row(s)1').item.json.spentTotal }} ₸\n\n🛒 Импульсивные покупки\n\nЗа месяц: {{ $json.impulsive_month }}\nЗа всё время: {{ $json.impulsive_total }}\n\n📈 Процент импульсивности\n\nЗа месяц: {{ $json.impulsiveMonthPercentage }} %\nЗа всё время: {{ $json.impulsiveTotalPercentage }} %\n",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        544,
+        1184
+      ],
+      "id": "7918dcfd-c204-4ec0-b734-5d8b4ba2a158",
+      "name": "Send a text message15",
+      "webhookId": "8dcd23bf-fbf9-4020-a404-f57b4e5caf07",
+      "credentials": {
+        "telegramApi": {
+          "id": "jA50DVowbKhfv8md",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "1kT253CdSSxSwROois3meAqiLs7sPec0r",
+          "mode": "list",
+          "cachedResultName": "3.png",
+          "cachedResultUrl": "https://drive.google.com/file/d/1kT253CdSSxSwROois3meAqiLs7sPec0r/view?usp=drivesdk"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        816,
+        1184
+      ],
+      "id": "80d14299-8f00-4860-977b-1f49e26a510d",
+      "name": "Download file2",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "CmnhH1LphU3YAbDH",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendDocument",
+        "chatId": "={{ $('Telegram Trigger').first().json.callback_query.message.chat.id }}",
+        "binaryData": true,
+        "replyMarkup": "inlineKeyboard",
+        "inlineKeyboard": {
+          "rows": [
+            {
+              "row": {
+                "buttons": [
+                  {
+                    "text": "Назад",
+                    "additionalFields": {
+                      "callback_data": "profile"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "additionalFields": {
+          "caption": "Траты по категориям"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1072,
+        1184
+      ],
+      "id": "b8a4eac8-1177-40e5-91cd-593c768bb545",
+      "name": "Send a document",
+      "webhookId": "6a5bedd1-48c5-4d4d-aec9-11c42a7869eb",
+      "credentials": {
+        "telegramApi": {
+          "id": "jA50DVowbKhfv8md",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').first().json.callback_query.message.chat.id }}",
+        "text": "=Статистика @{{ $('Telegram Trigger').first().json.callback_query.message.chat.username }} в течении недели:\n\n💰 Траты\n\nЗа неделю: {{ $('Upsert row(s)3').item.json.spentWeek }} ₸\nЗа всё время: {{ $('Upsert row(s)3').item.json.spentTotal }} ₸\n\n🛒 Импульсивные покупки\n\nЗа  неделю: {{ $json.impulsive_week }}\nЗа всё время: {{ $json.impulsive_total }}\n\n📈 Процент импульсивности\n\nЗа неделю: {{ $json.impulsiveMonthPercentage }} %\nЗа всё время: {{ $json.impulsiveTotalPercentage }} %\n",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        544,
+        976
+      ],
+      "id": "d84c0b58-ffcc-44ce-aab9-496d9bd8946d",
+      "name": "Send a text message16",
+      "webhookId": "8dcd23bf-fbf9-4020-a404-f57b4e5caf07",
+      "credentials": {
+        "telegramApi": {
+          "id": "jA50DVowbKhfv8md",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "1pdmVYOzMbzRWUEMPitWnsysmQBF95xmi",
+          "mode": "list",
+          "cachedResultName": "1.png",
+          "cachedResultUrl": "https://drive.google.com/file/d/1pdmVYOzMbzRWUEMPitWnsysmQBF95xmi/view?usp=drivesdk"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        816,
+        976
+      ],
+      "id": "3068f70a-f361-4b64-9102-163adf906a07",
+      "name": "Download file3",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "CmnhH1LphU3YAbDH",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendDocument",
+        "chatId": "={{ $('Telegram Trigger').first().json.callback_query.message.chat.id }}",
+        "binaryData": true,
+        "replyMarkup": "inlineKeyboard",
+        "inlineKeyboard": {
+          "rows": [
+            {
+              "row": {
+                "buttons": [
+                  {
+                    "text": "Назад",
+                    "additionalFields": {
+                      "callback_data": "profile"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "additionalFields": {
+          "caption": "Траты по категориям"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1072,
+        976
+      ],
+      "id": "a1b26697-f100-493f-80fe-1f2f4281b0ba",
+      "name": "Send a document1",
+      "webhookId": "6a5bedd1-48c5-4d4d-aec9-11c42a7869eb",
+      "credentials": {
+        "telegramApi": {
+          "id": "jA50DVowbKhfv8md",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.callback_query.message.chat.id }}",
+        "text": "=💳 Профиль {{ $json.username }}:\n\n💰 Текущий баланс: {{ $json.balance }} ₸\n🎯 Цель: {{ $json.goal }}\n🏁 Начальный баланс: {{ $json.startingValue }}₸\n💡 Целевая сумма: {{ $json.endValue }}₸\n📉 Осталось накопить: {{ $json.endValue - $json.startingValue}}₸\n⏰ Время до достижения цели: {{ $json.goalEndYear }}\n",
+        "replyMarkup": "inlineKeyboard",
+        "inlineKeyboard": {
+          "rows": [
+            {
+              "row": {
+                "buttons": [
+                  {
+                    "text": "Дружеская программа",
+                    "additionalFields": {
+                      "callback_data": "friend"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "row": {
+                "buttons": [
+                  {
+                    "text": "Статистика за неделю",
+                    "additionalFields": {
+                      "callback_data": "stat_week"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "row": {
+                "buttons": [
+                  {
+                    "text": "Статистика за месяц",
+                    "additionalFields": {
+                      "callback_data": "stat_month"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -448,
+        2128
+      ],
+      "id": "2b8f0693-b6a9-4dfe-aae4-a813eb6e7b58",
+      "name": "Send a text message17",
+      "webhookId": "be645be2-7ee2-4f90-a639-51cbf4420656",
+      "credentials": {
+        "telegramApi": {
+          "id": "jA50DVowbKhfv8md",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "veoeBbwJsnooiMZ9",
+          "mode": "list",
+          "cachedResultName": "users",
+          "cachedResultUrl": "/projects/hue1evCP1XInYnyu/datatables/veoeBbwJsnooiMZ9"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "user_id",
+              "keyValue": "={{ $json.callback_query.message.chat.id }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        -624,
+        2128
+      ],
+      "id": "5e57bce9-84be-4db6-9242-37483e8b087f",
+      "name": "Get row(s)11",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "quoRFZvu9zGteYzH",
+          "mode": "list",
+          "cachedResultName": "user_impulsives",
+          "cachedResultUrl": "/projects/hue1evCP1XInYnyu/datatables/quoRFZvu9zGteYzH"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "user_id",
+              "keyValue": "={{ $('Telegram Trigger').item.json.message.chat.id }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.dataTableTool",
+      "typeVersion": 1,
+      "position": [
+        1840,
+        -16
+      ],
+      "id": "77f1b1fd-3615-4d3f-b30e-3da3acd2256a",
+      "name": "GetImpulsives"
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "dataTableId": {
+          "__rl": true,
+          "value": "3v7LZwLYSWTPnqR9",
+          "mode": "list",
+          "cachedResultName": "users_spendings",
+          "cachedResultUrl": "/projects/hue1evCP1XInYnyu/datatables/3v7LZwLYSWTPnqR9"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "user_id",
+              "keyValue": "={{ $('Telegram Trigger').item.json.message.chat.id }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "spentToday": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('spentToday', ``, 'number') }}",
+            "spentTotal": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('spentTotal', ``, 'number') }}",
+            "spentWeek": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('spentWeek', ``, 'number') }}",
+            "spentMonth": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('spentMonth', ``, 'number') }}",
+            "user_id": "={{ $('Telegram Trigger').item.json.message.chat.id }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "user_id",
+              "displayName": "user_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "spentToday",
+              "displayName": "spentToday",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "spentTotal",
+              "displayName": "spentTotal",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "spentWeek",
+              "displayName": "spentWeek",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "spentMonth",
+              "displayName": "spentMonth",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTableTool",
+      "typeVersion": 1,
+      "position": [
+        1728,
+        -16
+      ],
+      "id": "3c6b8d88-675b-4621-bcdc-2a331b4bbf2f",
+      "name": "SpentToday"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "AVf5GI1GI29cxgFz",
+          "mode": "list",
+          "cachedResultName": "friend_program",
+          "cachedResultUrl": "/projects/hue1evCP1XInYnyu/datatables/AVf5GI1GI29cxgFz"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "user_id",
+              "keyValue": "={{ $('Telegram Trigger').item.json.message.chat.id }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        -928,
+        -16
+      ],
+      "id": "1cf3d9cf-26bd-4158-8225-dc4f1ddf6048",
+      "name": "Get row(s)12",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "veoeBbwJsnooiMZ9",
+          "mode": "list",
+          "cachedResultName": "users",
+          "cachedResultUrl": "/projects/hue1evCP1XInYnyu/datatables/veoeBbwJsnooiMZ9"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "username",
+              "keyValue": "={{ $json.pairUsername }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        -720,
+        -16
+      ],
+      "id": "c755a9d6-24ff-49b4-ba5c-387495814d95",
+      "name": "Get row(s)13",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Get row(s)13').item.json.user_id }}",
+        "text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Text', ``, 'string') }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegramTool",
+      "typeVersion": 1.2,
+      "position": [
+        1504,
+        -16
+      ],
+      "id": "2160824c-4a6b-49f6-b52c-b09f77e47a1e",
+      "name": "SendToUser2",
+      "webhookId": "b0c52323-6f2d-44b8-bfc7-69484911dd36",
+      "credentials": {
+        "telegramApi": {
+          "id": "jA50DVowbKhfv8md",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "dataTableId": {
+          "__rl": true,
+          "value": "AVf5GI1GI29cxgFz",
+          "mode": "list",
+          "cachedResultName": "friend_program",
+          "cachedResultUrl": "/projects/hue1evCP1XInYnyu/datatables/AVf5GI1GI29cxgFz"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "user_id",
+              "keyValue": "={{ $('Telegram Trigger').item.json.message.chat.id }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "user_id": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+            "pairUsername": "={{ $('Get row(s)12').item.json.pairUsername }}",
+            "currentStreak": 0
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "user_id",
+              "displayName": "user_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "pairUsername",
+              "displayName": "pairUsername",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "dailyLimit",
+              "displayName": "dailyLimit",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "currentStreak",
+              "displayName": "currentStreak",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "lastCheckDate",
+              "displayName": "lastCheckDate",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "bestStreak",
+              "displayName": "bestStreak",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "isAccepted",
+              "displayName": "isAccepted",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "readOnly": false,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTableTool",
+      "typeVersion": 1,
+      "position": [
+        1376,
+        -16
+      ],
+      "id": "eaf16c59-be9e-40a4-8f95-cb0df4518292",
+      "name": "DeleteFriend"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "If2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a file": {
+      "main": [
+        [
+          {
+            "node": "Transcribe a recording",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transcribe a recording": {
+      "main": [
+        [
+          {
+            "node": "Retrieve Points",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Switch2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get a file",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get row(s)7",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Retrieve Points",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch2": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a text message4",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a text message2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s)": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Get row(s)12",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Upsert row(s)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "UpdateFS": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "UpdateGoal": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update row(s)": {
+      "main": [
+        [
+          {
+            "node": "Send a text message3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Update row(s)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GetUser": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Retrieve Points": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If2": {
+      "main": [
+        [
+          {
+            "node": "Get row(s)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Switch1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a text message5": {
+      "main": [
+        []
+      ]
+    },
+    "Switch1": {
+      "main": [
+        [
+          {
+            "node": "Get row(s)6",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Download file1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Download file",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get row(s)2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get row(s)4",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get row(s)9",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get row(s)11",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory1": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AddPair": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent1": {
+      "main": [
+        [
+          {
+            "node": "Send a text message6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a text message6": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a text message7": {
+      "main": [
+        []
+      ]
+    },
+    "Get row(s)1": {
+      "main": [
+        [
+          {
+            "node": "Send a text message7",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript2": {
+      "main": [
+        [
+          {
+            "node": "Get row(s)1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a text message8": {
+      "main": [
+        [
+          {
+            "node": "Send a text message9",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s)2": {
+      "main": [
+        [
+          {
+            "node": "Get row(s)3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s)3": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a text message10": {
+      "main": [
+        [
+          {
+            "node": "Send a text message11",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s)4": {
+      "main": [
+        [
+          {
+            "node": "Get row(s)5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s)5": {
+      "main": [
+        [
+          {
+            "node": "Delete row(s)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update row(s)1": {
+      "main": [
+        [
+          {
+            "node": "Send a text message8",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript3": {
+      "main": [
+        [
+          {
+            "node": "Update row(s)1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upsert row(s)": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s)6": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Get row(s)8",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a text message5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s)7": {
+      "main": [
+        [
+          {
+            "node": "If3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If3": {
+      "main": [
+        [
+          {
+            "node": "Send a text message12",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s)8": {
+      "main": [
+        [
+          {
+            "node": "Send a text message12",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a text message11": {
+      "main": [
+        []
+      ]
+    },
+    "Delete row(s)": {
+      "main": [
+        [
+          {
+            "node": "Send a text message10",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s)9": {
+      "main": [
+        [
+          {
+            "node": "Get row(s)10",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s)10": {
+      "main": [
+        [
+          {
+            "node": "Delete row(s)1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a text message13": {
+      "main": [
+        [
+          {
+            "node": "Send a text message14",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete row(s)1": {
+      "main": [
+        [
+          {
+            "node": "Send a text message13",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript4": {
+      "main": [
+        [
+          {
+            "node": "Upsert row(s)1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upsert row(s)1": {
+      "main": [
+        [
+          {
+            "node": "Upsert row(s)2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file1": {
+      "main": [
+        [
+          {
+            "node": "Extract from File1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript5": {
+      "main": [
+        [
+          {
+            "node": "Upsert row(s)3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File1": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upsert row(s)3": {
+      "main": [
+        [
+          {
+            "node": "Upsert row(s)4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upsert row(s)2": {
+      "main": [
+        [
+          {
+            "node": "Send a text message15",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upsert row(s)4": {
+      "main": [
+        [
+          {
+            "node": "Send a text message16",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a text message15": {
+      "main": [
+        [
+          {
+            "node": "Download file2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file2": {
+      "main": [
+        [
+          {
+            "node": "Send a document",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a text message16": {
+      "main": [
+        [
+          {
+            "node": "Download file3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file3": {
+      "main": [
+        [
+          {
+            "node": "Send a document1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s)11": {
+      "main": [
+        [
+          {
+            "node": "Send a text message17",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GetImpulsives": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SpentToday": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s)12": {
+      "main": [
+        [
+          {
+            "node": "Get row(s)13",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s)13": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SendToUser2": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DeleteFriend": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "97c96ff4-22c4-4b43-9986-027b4411040a",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "a621f4272d127db06fa4dc4f565608c486456a222ca81521a1af2685728d0d82"
+  },
+  "id": "RiwN9SNZWoVvGd5b",
+  "tags": []
+}
